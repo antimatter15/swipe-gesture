@@ -21,8 +21,8 @@ var directionality = 4;
 var actionDelay = 100;
 
 window.addEventListener('mousewheel', function(e){
-	var inv = e.webkitDirectionInvertedFromDevice ? 1 : -1;
-	//if(Math.abs(e.wheelDeltaX) > 100 &&  Math.abs(e.wheelDeltaX) > Math.abs(e.wheelDeltaY)
+	var inv = e.webkitDirectionInvertedFromDevice ? -1 : 1;
+	var rev = 1; //set to -1 if reversing direction.
 	var timeDelta = e.timeStamp - lastTime;
 	var speed = (e.wheelDeltaX)/(timeDelta);
 	var accel = speed/timeDelta;
@@ -32,12 +32,11 @@ window.addEventListener('mousewheel', function(e){
 			 if(Math.abs(e.wheelDeltaX) > directionality * Math.abs(e.wheelDeltaY)){
 				if(new Date - lastAction > actionDelay){
 					var direction = e.wheelDeltaX / Math.abs(e.wheelDeltaX);
-					history.go(direction * inv);
+					history.go(direction * inv * rev * -1);
 				}
 				lastAction = +new Date;
 			}
 		}
-
 		lastSpeed = speed;
 	}
 	lastDelta = e.wheelDeltaX;

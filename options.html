@@ -1,0 +1,80 @@
+<div id="thresh" style="width: 5px; height: 40px; position: absolute;top:10px;background:#007fff"></div>
+<div id="bar" style="width: 0px;height:28px;background:#ccc;position:absolute;top:15px;border:1px solid gray"></div>
+<div id="peak" style="width: 5px; height: 40px; position: absolute;top:10px;background:green"></div>
+
+<div style="margin-left:auto;margin-right:auto;width:800px;background:#ddd;margin-top:60px;padding-left:25px;padding-top:5px;padding-right:25px;padding-bottom:15px;">
+	<h1>Swipe Gestures <span style="color:gray">Settings</span></h1>
+	<div style="float:right; padding: 10px; background:white;width:250px;font-size:x-small; margin-left: 15px">
+		<img src="apple.png" style="margin-bottom:10px;">
+		Here's a picture gently stolen from Apple showing exactly what this extension enables.
+	</div>
+	<p>
+		So far there aren't any settings, sorry. There probably should be a lone check box which lets you switch direction but there isn't because I haven't figured out a way to do that without having to create a background page. Maybe later there will be some way to change sensitivity and direction.
+	</p>
+	<p>
+		But anyway, this page is a place where you can experiment with the extension. Over on the top is a series of bars which will respond to varying degrees of pressure. The page will <b>flash green</b> when the force has passed the activation threshold (denoted by the blue bar) so you can begin to get an intuitition of how much force activates it. After that, you should wait until the page background turns white again before trying again.
+	</p>
+	<p>
+		The default behavior is the same as Mac OS X. If you go to Pointer settings and enable "simple scrolling direction", swiping to the right means navigating back in the same manner as Mac OS X Lion. Otherwise, it is the same gesture as OS X Leopard, where swiping right means going forward.
+	</p>
+	<p>
+		Made by <a href="http://twitter.com/antimatter15">@antimatter15</a>. Follow me on <a href="https://plus.google.com/116347431032639424492/about">Google+</a> or read my <a href="http://antimatter15.com">blog</a>. Submit issues or contribute through <a href="https://github.com/antimatter15/swipe-gesture">Github</a>.
+	</p>
+</div>
+
+<style>
+body {
+	font-family: sans-serif;
+	-webkit-transition: background 0.3s linear;
+}
+</style>
+
+<script>
+var lastTime = 0;
+var lastDelta = 0;
+var lastSpeed = 0;
+var peak = 0;
+var thresh = 1;
+
+var mag = 76;
+var track = 0;
+window.addEventListener('mousewheel', function(e){
+	//var inv = webkitDirectionInvertedFromDevice;
+	//if(Math.abs(e.wheelDeltaX) > 100 &&  Math.abs(e.wheelDeltaX) > Math.abs(e.wheelDeltaY)
+	var timeDelta = e.timeStamp - lastTime;
+	var speed = (e.wheelDeltaX)/(timeDelta);
+	var accel = speed/timeDelta;
+
+	if(timeDelta < 200 && timeDelta > 10){
+		if(document.body.style.background == '')
+			document.body.style.background = 'rgb(255,200,200)';
+
+		if(Math.abs(accel) > thresh){
+			document.body.style.background = 'rgb(200,255,200)';
+		}
+		peak = Math.max(peak, Math.abs(accel));
+		lastSpeed = speed;
+		document.getElementById('bar').style.width = mag * Math.abs(accel) + 'px';
+		document.getElementById('peak').style.left = mag * peak + 'px';
+
+	}
+
+	if(timeDelta < 10){
+		//console.log(e, speed, accel, timeDelta)
+	}
+	lastDelta = e.wheelDeltaX;
+	lastTime = e.timeStamp;
+	//console.log(e.wheelDeltaX, +new Date)
+	clearTimeout(track);
+	track = setTimeout(endgame, 200);
+}, true);
+
+
+function endgame(){
+	console.log(peak);
+	peak = 0;
+	document.body.style.background = '';
+}
+
+document.getElementById('thresh').style.left = mag * thresh + 'px';
+</script>
