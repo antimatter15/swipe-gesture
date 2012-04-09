@@ -1,0 +1,7 @@
+<script src="swipe.js"></script>
+<script>
+var states = 'one.618,two.718,three.159,four4,five.670,six.022,se7en,eight.987'
+states.split(',').forEach(function(e){
+	history.pushState({}, '', '?'+e)
+})
+</script>
