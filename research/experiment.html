@@ -1,0 +1,151 @@
+
+<script>
+
+function createArrow(orientation){
+	orientation = (orientation || 0) % 360;
+
+	var canvas = document.createElement('canvas');
+	canvas.style.opacity = 0;
+	canvas.style.borderRadius = '10px';
+	canvas.style.padding = '10px';
+	if(orientation == 0){
+		canvas.style.paddingLeft = '50px';
+	}else if(orientation == 90){
+		canvas.style.paddingTop = '50px';
+	}else if(orientation == 180){
+		canvas.style.paddingRight = '50px';
+	}else if(orientation == 270){
+		canvas.style.paddingBottom = '50px';
+	}
+	
+	canvas.style.background = 'black';
+
+	canvas.width = 50;
+	canvas.height = 50;
+	var c = canvas.getContext('2d');
+
+	c.beginPath()
+	c.fillStyle = 'white';
+
+	var shaft_rad = 5, point_len = 15, head_rad = 15, shaft_len = 30;
+
+	c.translate(25, 25)
+	c.rotate(Math.PI/180 * orientation);
+
+	var x = -(shaft_len + point_len) / 2, y = 0;
+
+	c.moveTo(x, y - shaft_rad);
+	c.lineTo(x + shaft_len, y - shaft_rad) // le shaft
+	c.lineTo(x + shaft_len, y - head_rad) // arrow face
+	c.lineTo(x + shaft_len + point_len, y) // le cusp
+	c.lineTo(x + shaft_len, y + head_rad) // arrow face
+	c.lineTo(x + shaft_len, y + shaft_rad) 
+	c.lineTo(x, y + shaft_rad); // le shaft
+	c.lineTo(x, y - shaft_rad); // the butt
+	c.fill();
+
+	canvas.style.webkitTransitionProperty = 'opacity, -webkit-transform, transform';
+	canvas.style.webkitTransitionDuration = '0.5s, 0.5s'
+	canvas.style.position = 'fixed';
+	canvas.style.top = (innerHeight / 2) + 'px';
+	
+	setTimeout(function(){
+		canvas.style.opacity = 0.5;
+	}, 10)
+	
+
+	return canvas
+}
+
+
+var scrollListened = [];
+var lastDetectedScroll = 0;
+var isTriggering = 0;
+var wheelBuffer = [];
+var lastWheelTimer = -1;
+var navArrow;
+
+function detectScroll(e){
+	// console.log("detected scroll on", e.target, e, +new Date)
+	lastDetectedScroll = +new Date;
+	removeListeners();
+}
+
+function removeListeners(){
+	for(var i = 0; i < scrollListened.length; i++){
+		scrollListened[i].removeEventListener('scroll', detectScroll, false)
+	}
+	scrollListened = [];
+}
+
+function mouseWheel(x, y){
+	clearTimeout(lastWheelTimer);
+	lastWheelTimer = setTimeout(endTrigger, 500);
+	console.log(x, y)
+}
+
+function endTrigger(){
+	console.log("ITS OVER")
+	isTriggering = 0;
+	wheelBuffer = [];
+	navArrow.style.opacity = 0;
+	navArrow.style.webkitTransform = 'scale(2.0)'
+	// document.body.removeChild(navArrow);
+}
+
+function beginTrigger(){
+	navArrow = createArrow(0)
+	document.body.appendChild(navArrow)
+}
+
+window.addEventListener('mousewheel', function(e){
+	// console.log(e.wheelDeltaX, e.wheelDeltaY, +new Date);
+	if(isTriggering == 2){
+		// psst, pass it on
+		mouseWheel(e.wheelDeltaX, e.wheelDeltaY);
+	}else{ //isTriggering == 1 or 0, add to buffer
+		wheelBuffer.push([e.wheelDeltaX, e.wheelDeltaY]);
+	}
+	if(isTriggering == 0){
+		removeListeners();
+		var el = document.elementFromPoint(e.clientX, e.clientY);
+		do {
+			// console.log("parent", el);
+			scrollListened.push(el);
+			el.addEventListener('scroll', detectScroll, false);	
+		} while (el = el.parentNode);
+		var checkpointScroll = lastDetectedScroll;
+		isTriggering = 1;
+		setTimeout(function(){
+			if(checkpointScroll == lastDetectedScroll){
+				// Okay, continue.
+				// console.log("CONTINUE")
+				isTriggering = 2;
+				beginTrigger();
+				for(var i = 0; i < wheelBuffer.length; i++){
+					mouseWheel(wheelBuffer[i][0], wheelBuffer[i][1]);
+				}
+				wheelBuffer = [];
+			}else{
+				isTriggering = 0;
+				wheelBuffer = []; //clear buffer
+				// console.log("ABORT")
+				//ABORT ABORT ABORT, the wheeling triggered a scroll
+			}
+		}, 50); // empirically, the margin is usually only about 3msecs
+		// so having an order of magnitude's worth in leeway is probably
+		// sufficient
+	}
+})
+
+// window.addEventListener('scroll', detectScroll, false);	//one permanent listener
+</script>
+<br><br><br><br><br><br>
+<div style="width:400px; height: 200px;background-color:#c0ffee;overflow:scroll">
+	<div style="width: 200px; height: 100px; background-color: #007fff; margin: 100px"></div>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+</div>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>

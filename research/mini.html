@@ -1,0 +1,14 @@
+<script>
+var collected = [];
+var ofst = +new Date;
+window.addEventListener('mousewheel', function(e){
+	collected.push([e.wheelDeltaX, e.wheelDeltaY, +new Date - ofst])
+})
+function magic(){
+	document.getElementById('exp').style.display = 'none'
+	document.getElementById('ta').value = JSON.stringify(collected);
+	document.getElementById('ta').style.display = ''
+}
+</script>
+<button onclick="magic()" id="exp">Export data</button>
+<textarea id="ta" style="width: 100%; height: 100%; position: aboslute; top: 0; left: 0; display: none"></textarea>

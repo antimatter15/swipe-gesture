@@ -1,0 +1,26 @@
+<canvas id="c" style="top:0;left:0;position:absolute"></canvas>
+<script>
+var canvas = document.getElementById('c');
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+var c = canvas.getContext('2d');
+
+var log = [[120,0,614],[120,0,628],[120,0,644],[120,0,652],[120,0,660],[120,0,676],[120,0,684],[120,0,700],[120,0,708],[120,0,716],[120,0,732],[120,0,740]]
+
+
+
+var posX = innerWidth / 2, posY = innerHeight / 2;
+c.beginPath()
+c.moveTo(posX, posY);
+function nextLog(){
+	var e = log.shift();
+	posX += e[0] / 20;
+	posY += e[1] / 20;
+	c.lineTo(posX, posY);
+	c.fillRect(posX - 1, posY - 1, 2, 2)
+	c.stroke()
+	if(log[0]) 
+		setTimeout(nextLog, log[0][2] - e[2]);
+}
+nextLog();
+</script>
