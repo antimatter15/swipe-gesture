@@ -19,16 +19,35 @@ body {
 		<img src="apple.png" style="margin-bottom:10px;">
 		Here's a picture gently stolen from Apple showing exactly what this extension enables.
 	</div>
-	<p>
+<!-- 	<p>
 		So far there aren't any settings, sorry. There probably should be a lone check box which lets you switch direction but there isn't because I haven't figured out a way to do that without having to create a background page. Maybe later there will be some way to change sensitivity and direction.
+	</p> -->
+	<p>
+		<input type="checkbox" id="reverse"> <label for="reverse">Reverse Mapping (similar to the natural gestures in Lion)</label>
 	</p>
 	<p>
-		But anyway, this page is a place where you can experiment with the extension. Over on the top is a series of bars which will respond to varying degrees of pressure. The page will <b>flash green</b> when the force has passed the activation threshold (denoted by the blue bar) so you can begin to get an intuitition of how much force activates it. After that, you should wait until the page background turns white again before trying again.
+		This page is a place where you can experiment with the extension. Over on the top is a series of bars which will respond to varying degrees of pressure. The page will <b>flash green</b> when the force has passed the activation threshold (denoted by the blue bar) so you can begin to get an intuitition of how much force activates it. After that, you should wait until the page background turns white again before trying again.
 	</p>
 	<p>
 		The default behavior is the same as Mac OS X. If you go to Pointer settings and enable "simple scrolling direction", swiping to the right means navigating back in the same manner as Mac OS X Lion. Otherwise, it is the same gesture as OS X Leopard, where swiping right means going forward.
 	</p>
+
 	<p>
+		<input type="checkbox" id="dev" onchange="document.getElementById('devmode').style.display = this.checked?'':'none'"> <label for="dev">Developer Mode</label> 
+	</p>
+	<div id="devmode" style="display:none; border-left: 5px solid gray; padding-left: 30px; margin-left: 5px">
+		<p>
+			<select>
+				<option>Horizontal Scroll Action</option>
+				<option>Vertical Scroll Action</option>
+			</select>
+			<label> Select what type of scrolling the extension should listen for </label>
+		</p>
+		<p>
+			<button>Begin Recording</button>
+		</p>
+	</div>
+	<p style="font-size: 70%">
 		Made by <a href="http://twitter.com/antimatter15">@antimatter15</a>. Follow me on <a href="https://plus.google.com/116347431032639424492/about">Google+</a> or read my <a href="http://antimatter15.com">blog</a>. Submit issues or contribute through <a href="https://github.com/antimatter15/swipe-gesture">Github</a>.
 	</p>
 </div>
