@@ -1,4 +1,8 @@
-
+<style>
+body {
+	-webkit-transition: background-color 1s;
+}
+</style>
 <script>
 
 
@@ -8,29 +12,6 @@ function drawArrow(canvas, orientation){
 
 	canvas.width = 50;
 	canvas.height = 50;
-
-	// if(orientation == 0){
-	// 	canvas.style.paddingLeft = '50px';
-	// 	canvas.style.top = (innerHeight / 2) + 'px';
-	// 	canvas.style.left = (-100) + 'px';
-	// }else if(orientation == 180){
-	// 	canvas.style.paddingRight = '50px';
-	// 	canvas.style.top = (innerHeight / 2) + 'px';
-	// 	canvas.style.left = (innerWidth) + 'px';
-		
-	// }else if(orientation == 90){
-	// 	canvas.style.paddingTop = '50px';
-	// 	canvas.style.top = (-100) + 'px';
-	// 	canvas.style.left = (innerWidth / 2) + 'px';
-	// }else if(orientation == 270){
-	// 	canvas.style.paddingBottom = '50px';
-	// 	canvas.style.top = (innerHeight) + 'px';
-	// 	canvas.style.left = (innerWidth / 2) + 'px';
-	// }else{
-	// 	canvas.style.top = (innerHeight / 2) + 'px';
-	// 	canvas.style.left = (innerWidth / 2) + 'px';
-	// }
-
 
 	var c = canvas.getContext('2d');
 
@@ -73,14 +54,10 @@ function createArrow(){
 	canvas.style.padding = '10px';
 
 	canvas.style.webkitTransitionProperty = 'opacity, -webkit-transform, transform, top, left';
-	canvas.style.webkitTransitionDuration = '0.5s, 0.5s, 0.2s, 0.2s'
+	canvas.style.webkitTransitionDuration = '0.5s, 0.5s, 0.5s, 0.5s'
 	canvas.style.position = 'absolute';
 	
 
-	// setTimeout(function(){
-	// 	canvas.style.opacity = 0.5;
-	// }, 10)
-	
 	container.appendChild(canvas);
 	document.body.appendChild(container)
 	return canvas;
@@ -110,6 +87,9 @@ function removeListeners(){
 
 var len = 0;
 function mouseWheel(x, y){
+	x /= 2;
+	y /= 2;
+
 	var dp = Math.cos(direction / 180 * Math.PI) * x + Math.sin(direction / 180 * Math.PI) * y;
 	
 	len += dp;
@@ -121,7 +101,8 @@ function mouseWheel(x, y){
 	// console.log(dp, len, pct);
 	renderProgress(pct);
 
-	if(pct == 1){
+	if(pct >= 0.75){
+		// navArrow.style.backgroundColor = 'blue'
 		//DONE!
 		removeArrow(navArrow, true);
 		// endTrigger()
@@ -135,7 +116,8 @@ function mouseWheel(x, y){
 // var lastCompletion = 0;
 function signalCompletion(){
 	if(currentSession != 3){
-		console.log('asdfja9ofjawerjwoaer')
+		console.log('asdfja9ofjawerjwoaer', direction)
+		document.body.style.backgroundColor = '#B9D3B9';
 	}
 }
 
@@ -144,21 +126,22 @@ function renderProgress(pct){
 		// console.log(pct)
 		// console.log(navArrow.style.left)
 		navArrow.style.opacity = pct * 0.5;
-		if(direction == 180){
-			navArrow.style.left = (innerWidth * ( 1 - pct) - 50) + 'px';
-			navArrow.style.top = (innerHeight / 2) + 'px';
-		}else if(direction == 0){
-			navArrow.style.left = innerWidth * pct + 'px';
-			navArrow.style.top = (innerHeight / 2) + 'px';
-		}else if(direction == 270){
-			navArrow.style.top = (innerHeight * (1-pct) - 50) + 'px';
-			navArrow.style.left = (innerWidth / 2 - 25) + 'px';
-		}else if(direction == 90){
-			navArrow.style.top = innerHeight * pct + 'px';
+		if(direction == 180 || direction == 0){
+			navArrow.style.top = (innerHeight / 2 - 25) + 'px';
+		}else if(direction == 270 || direction == 90){
 			navArrow.style.left = (innerWidth / 2 - 25) + 'px';
 		}
-		// navArrow.style.left = (parseInt(navArrow.style.left) - x) + 'px';
-		// navArrow.style.top = (parseInt(navArrow.style.top) - y) + 'px';
+		// pct = 1 - pct 
+		if(direction == 180){
+			navArrow.style.left = (innerWidth * ( 1 - pct) - 50) + 'px';
+		}else if(direction == 0){
+			navArrow.style.left = innerWidth * pct + 'px';
+		}else if(direction == 270){
+			navArrow.style.top = (innerHeight * (1-pct) - 50) + 'px';
+		}else if(direction == 90){
+			navArrow.style.top = innerHeight * pct + 'px';
+		}
+
 	}
 }
 
@@ -171,10 +154,6 @@ function renderProgress(pct){
 // 	// document.body.removeChild(navArrow);
 // }
 
-function beginTrigger(){
-	
-	
-}
 
 var currentSession = -1;
 // 0 = unknown/not begun
@@ -186,9 +165,10 @@ function removeArrow(arrow, complete){
 	if(arrow && arrow.style){
 		if(complete){
 			renderProgress(1)	
-		}else{
+		}else if(currentSession != 3){
 			renderProgress(0)
 			arrow.style.webkitTransform = 'scale(2.0)';
+			document.body.style.backgroundColor = '#D1A5A5';
 		}
 		
 		arrow.addEventListener('webkitTransitionEnd', function(){
@@ -203,12 +183,17 @@ function removeArrow(arrow, complete){
 }
 
 function endTrigger(){
-	currentSession = -1;
 	removeArrow(navArrow);
+	currentSession = -1;
 	wheelBuffer = [];
 	len = 0;
 	navArrow = null;
 	clearTimeout(lastWheelTimer);
+	setTimeout(function(){
+		document.body.style.backgroundColor = '';
+	}, 500)
+	
+	
 	console.log("DONE")
 }
 
@@ -224,10 +209,12 @@ window.addEventListener('mousewheel', function(e){
 		//because negative = scroll down
 		wheelBuffer.push([-e.wheelDeltaX, -e.wheelDeltaY]);
 	}
-	if(currentSession == 2){
-		mouseWheel(-e.wheelDeltaX, -e.wheelDeltaY);
+	if(currentSession == 2 || currentSession == 3){
 		e.preventDefault();
 		e.stopPropagation();
+	}
+	if(currentSession == 2){
+		mouseWheel(-e.wheelDeltaX, -e.wheelDeltaY);
 
 	}else if(currentSession == -1){
 		removeListeners();
@@ -266,7 +253,7 @@ window.addEventListener('mousewheel', function(e){
 				setTimeout(function(){
 					if(checkpointScroll == lastDetectedScroll){
 						currentSession = 2;
-						beginTrigger();
+						// beginTrigger();
 						// Okay, continue.
 						// console.log("CONTINUE")
 						// isTriggering = 2;
@@ -298,7 +285,7 @@ window.addEventListener('mousewheel', function(e){
 </script>
 <br><br><br><br><br><br>
 <div style="width:400px; height: 200px;background-color:#c0ffee;overflow:scroll">
-	<div style="width: 200px; height: 100px; background-color: #007fff; margin: 100px"></div>
+	<div style="width: 300px; height: 150px; background-color: #007fff; margin: 100px"></div>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 </div>
