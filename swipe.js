@@ -63,6 +63,8 @@ function drawArrow(canvas, orientation){
 
 function createArrow(){
 	var container = document.createElement('div');
+	container.className = 'swipe-gestures-container-element';
+
 	container.style.position = 'fixed';
 	container.style.top = 0;
 	container.style.left = 0;
@@ -196,9 +198,9 @@ function removeArrow(arrow, complete){
 		}
 		
 		arrow.addEventListener('webkitTransitionEnd', function(){
-			var container = arrow.parentNode;
-			if(container.parentNode)
-				container.parentNode.removeChild(container);
+			var gc;
+			while(gc = document.querySelector('.swipe-gestures-container-element'))
+				gc.parentNode.removeChild(gc);
 		})
 	}
 	if(arrow === navArrow){
@@ -221,6 +223,9 @@ function scrollTrigger(){
 	wheelBuffer = [];
 	currentSession = 1;
 	signalScroll();
+	var gc;
+	while(gc = document.querySelector('.swipe-gestures-container-element'))
+		gc.parentNode.removeChild(gc);
 }
 
 

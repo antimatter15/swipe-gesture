@@ -9,29 +9,29 @@ body {
 </style>
 </head>
 <body>
-<div id="thresh" style="width: 5px; height: 40px; position: absolute;top:10px;background:#007fff"></div>
-<div id="bar" style="width: 0px;height:28px;background:#ccc;position:absolute;top:15px;border:1px solid gray"></div>
-<div id="peak" style="width: 5px; height: 40px; position: absolute;top:10px;background:green"></div>
 
-<div style="margin-left:auto;margin-right:auto;width:800px;background:#ddd;margin-top:60px;padding-left:25px;padding-top:5px;padding-right:25px;padding-bottom:15px;">
+<div style="margin-left:auto;margin-right:auto;width:800px;margin-top:60px;padding-left:25px;padding-top:5px;padding-right:25px;">
+
 	<h1>Swipe Gestures <span style="color:gray">Settings</span></h1>
+</div>
+<div style="margin-left:auto;margin-right:auto;width:800px;background:#ddd;padding-left:25px;padding-top:5px;padding-right:25px;padding-bottom:25px;padding-top:25px;overflow:auto;">
 	<div style="float:right; padding: 10px; background:white;width:250px;font-size:x-small; margin-left: 15px">
-		<img src="apple.png" style="margin-bottom:10px;">
+		<img src="img/apple.png" style="margin-bottom:10px;">
 		Here's a picture gently stolen from Apple showing exactly what this extension enables.
 	</div>
 <!-- 	<p>
 		So far there aren't any settings, sorry. There probably should be a lone check box which lets you switch direction but there isn't because I haven't figured out a way to do that without having to create a background page. Maybe later there will be some way to change sensitivity and direction.
 	</p> -->
+	
 	<p>
-		<input type="checkbox" id="reverse"> <label for="reverse">Reverse Mapping (similar to the natural gestures in Lion)</label>
+		This page is a place where you can experiment with the extension and the settings which you can configure on this page.<!--  Over on the top is a series of bars which will respond to varying degrees of pressure. The page will <b>flash green</b> when the force has passed the activation threshold (denoted by the blue bar) so you can begin to get an intuitition of how much force activates it. After that, you should wait until the page background turns white again before trying again. -->
 	</p>
-	<p>
-		This page is a place where you can experiment with the extension. Over on the top is a series of bars which will respond to varying degrees of pressure. The page will <b>flash green</b> when the force has passed the activation threshold (denoted by the blue bar) so you can begin to get an intuitition of how much force activates it. After that, you should wait until the page background turns white again before trying again.
-	</p>
-	<p>
+<!-- 	<p>
 		The default behavior is the same as Mac OS X. If you go to Pointer settings and enable "simple scrolling direction", swiping to the right means navigating back in the same manner as Mac OS X Lion. Otherwise, it is the same gesture as OS X Leopard, where swiping right means going forward.
+	</p> -->
+	<p>
+		<input type="checkbox" id="reverse"> <label for="reverse">Flip Arrow Direction</label>
 	</p>
-
 	<p>
 		<input type="checkbox" id="dev" onchange="document.getElementById('devmode').style.display = this.checked?'':'none'"> <label for="dev">Developer Mode</label> 
 	</p>
@@ -47,12 +47,14 @@ body {
 			<button>Begin Recording</button>
 		</p>
 	</div>
-	<p style="font-size: 70%">
+
+</div>
+<div style="margin-left:auto;margin-right:auto;width:800px;padding-left:25px;padding-top:15px;padding-right:25px;padding-bottom:15px;">
+		<p style="font-size: 70%">
 		Made by <a href="http://twitter.com/antimatter15">@antimatter15</a>. Follow me on <a href="https://plus.google.com/116347431032639424492/about">Google+</a> or read my <a href="http://antimatter15.com">blog</a>. Submit issues or contribute through <a href="https://github.com/antimatter15/swipe-gesture">Github</a>.
 	</p>
 </div>
 
-
-<script src="options.js"></script>
+<script src="swipe.js"></script>
 </body>
 </html>
