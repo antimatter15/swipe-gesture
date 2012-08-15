@@ -1,6 +1,6 @@
 <style>
 body {
-	-webkit-transition: background-color 1s;
+	-webkit-transition: background-color 0.5s;
 }
 </style>
 <script>
@@ -12,6 +12,10 @@ function signalCompletion(){
 }
 function signalCancellation(){
 	document.body.style.backgroundColor = '#D1A5A5';
+}
+function signalScroll(){
+	console.log('you see me scrolling')
+	document.body.style.backgroundColor = '#D7DB7F';
 }
 function signalEnd(){
 	console.log("DONE")
@@ -198,21 +202,32 @@ function removeArrow(arrow, complete){
 
 		})
 	}
+	if(arrow === navArrow){
+		navArrow = null;
+	}
 }
 
 function endTrigger(){
 	if(navArrow){
 		navArrow.style.webkitTransitionDuration = '0.5s, 0.5s, 0.5s, 0.5s, 0.5s, 0.5s'	
 	}
-	
+	signalEnd();
 	removeArrow(navArrow);
 	currentSession = -1;
 	wheelBuffer = [];
 	len = 0;
-	navArrow = null;
+	
 	clearTimeout(lastWheelTimer);
 	
-	signalEnd();
+}
+
+function scrollTrigger(){
+	if(navArrow) navArrow.style.display = 'none';
+	// endTrigger();
+	removeArrow(navArrow);
+	wheelBuffer = [];
+	currentSession = 1;
+	signalScroll();
 }
 
 var orientations = [180, 0, 315, 225, 90, 270, 135, 45]
@@ -277,14 +292,15 @@ window.addEventListener('mousewheel', function(e){
 						}
 						wheelBuffer = [];
 					}else{
-						if(navArrow) navArrow.style.display = 'none';
-						endTrigger();
-						currentSession = 1;
+
+						scrollTrigger()
 						//ABORT ABORT ABORT, the wheeling triggered a scroll
 					}
 				}, 10); // empirically, the margin is usually only about 3msecs
 				// so having an order of magnitude's worth in leeway is probably
 				// sufficient	
+			}else{
+				scrollTrigger()
 			}
 			
 		}, 150)
