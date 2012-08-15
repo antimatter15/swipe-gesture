@@ -6,6 +6,21 @@ body {
 <script>
 
 
+function signalCompletion(){
+	console.log('asdfja9ofjawerjwoaer', direction)
+	document.body.style.backgroundColor = '#B9D3B9';
+}
+function signalCancellation(){
+	document.body.style.backgroundColor = '#D1A5A5';
+}
+function signalEnd(){
+	console.log("DONE")
+	setTimeout(function(){
+		document.body.style.backgroundColor = '';
+	}, 500)
+}
+
+
 function drawArrow(canvas, orientation){
 	// orientation = -orientation;
 	orientation = (2 * 360 + (orientation || 0)) % 360;
@@ -18,7 +33,11 @@ function drawArrow(canvas, orientation){
 	c.beginPath()
 	c.fillStyle = 'white';
 
-	var shaft_rad = 5, point_len = 15, head_rad = 15, shaft_len = 30;
+	//parameters of drawing an arrow
+	var shaft_rad = 5, 
+		point_len = 15, 
+		head_rad = 15, 
+		shaft_len = 30;
 
 	c.translate(25, 25)
 	// c.scale(-1, 1)
@@ -65,14 +84,56 @@ function createArrow(){
 	return canvas;
 }
 
+function renderProgress(pct){
+	if(!navArrow) return; //nav arrow is necessary
+
+	// console.log(pct)
+	// console.log(navArrow.style.left)
+	navArrow.style.opacity = pct * 0.4 + 0.1;
+	if(direction == 180 || direction == 0){
+		navArrow.style.top = (innerHeight / 2 - 25) + 'px';
+	}else if(direction == 270 || direction == 90){
+		navArrow.style.left = (innerWidth / 2 - 25) + 'px';
+	}
+	if(direction == 180){ //LEFT
+		// navArrow.style.left = (innerWidth * ( 1 - pct) - 70) + 'px';
+		navArrow.style.right = innerWidth * pct + 'px';
+	}else if(direction == 0){ //RIGHT
+		navArrow.style.left = innerWidth * pct + 'px';
+	}else if(direction == 270){ //UP
+		// navArrow.style.top = (innerHeight * (1-pct) - 70) + 'px';
+		navArrow.style.bottom = innerHeight * pct + 'px';
+	}else if(direction == 90){ //DOWN
+		navArrow.style.top = innerHeight * pct + 'px';
+	}
+
+	//these are for the diags
+	if(direction == 315 || direction == 225){
+		navArrow.style.bottom = innerHeight * pct + 'px';
+	}else if(direction == 135 || direction == 45){
+		navArrow.style.top = innerHeight * pct + 'px';
+	}
+	if(direction == 315 || direction == 45){
+		navArrow.style.left = innerWidth * pct + 'px';
+	}else if(direction == 225 || direction == 135){
+		navArrow.style.right = innerWidth * pct + 'px';
+	}
+}
+
+
+
 
 var scrollListened = [];
 var lastDetectedScroll = 0;
-// var isTriggering = 0;
 var wheelBuffer = [];
 var lastWheelTimer = -1;
 var direction;
 var navArrow;
+var len = 0;
+var currentSession = -1;
+// 0 = unknown/not begun
+// 1 = scroll
+// 2 = MAGICALPONIES
 
 function detectScroll(e){
 	console.log("detected scroll on", e.target, e, +new Date)
@@ -87,7 +148,6 @@ function removeListeners(){
 	scrollListened = [];
 }
 
-var len = 0;
 function mouseWheel(x, y){
 	x /= 2;
 	y /= 2;
@@ -108,63 +168,15 @@ function mouseWheel(x, y){
 		//DONE!
 		removeArrow(navArrow, true);
 		// endTrigger()
-		signalCompletion();
+		if(currentSession != 3){
+			signalCompletion();	
+		}
+		
 		currentSession = 3;
 		
 	}
 	// console.log(x, y)
 }
-
-// var lastCompletion = 0;
-function signalCompletion(){
-	if(currentSession != 3){
-		console.log('asdfja9ofjawerjwoaer', direction)
-		document.body.style.backgroundColor = '#B9D3B9';
-	}
-}
-
-function renderProgress(pct){
-	if(navArrow){
-		// console.log(pct)
-		// console.log(navArrow.style.left)
-		navArrow.style.opacity = pct * 0.4 + 0.1;
-		if(direction == 180 || direction == 0){
-			navArrow.style.top = (innerHeight / 2 - 25) + 'px';
-		}else if(direction == 270 || direction == 90){
-			navArrow.style.left = (innerWidth / 2 - 25) + 'px';
-		}
-		if(direction == 180){ //LEFT
-			// navArrow.style.left = (innerWidth * ( 1 - pct) - 70) + 'px';
-			navArrow.style.right = innerWidth * pct + 'px';
-		}else if(direction == 0){ //RIGHT
-			navArrow.style.left = innerWidth * pct + 'px';
-		}else if(direction == 270){ //UP
-			// navArrow.style.top = (innerHeight * (1-pct) - 70) + 'px';
-			navArrow.style.bottom = innerHeight * pct + 'px';
-		}else if(direction == 90){ //DOWN
-			navArrow.style.top = innerHeight * pct + 'px';
-		}
-
-		//these are for the diags
-		if(direction == 315 || direction == 225){
-			navArrow.style.bottom = innerHeight * pct + 'px';
-		}else if(direction == 135 || direction == 45){
-			navArrow.style.top = innerHeight * pct + 'px';
-		}
-		if(direction == 315 || direction == 45){
-			navArrow.style.left = innerWidth * pct + 'px';
-		}else if(direction == 225 || direction == 135){
-			navArrow.style.right = innerWidth * pct + 'px';
-		}
-
-	}
-}
-
-
-var currentSession = -1;
-// 0 = unknown/not begun
-// 1 = scroll
-// 2 = MAGICALPONIES
 
 function removeArrow(arrow, complete){
 
@@ -174,7 +186,7 @@ function removeArrow(arrow, complete){
 		}else if(currentSession != 3){
 			renderProgress(0)
 			arrow.style.webkitTransform = 'scale(2.0)';
-			document.body.style.backgroundColor = '#D1A5A5';
+			signalCancellation()
 		}
 		
 		arrow.addEventListener('webkitTransitionEnd', function(){
@@ -199,12 +211,8 @@ function endTrigger(){
 	len = 0;
 	navArrow = null;
 	clearTimeout(lastWheelTimer);
-	setTimeout(function(){
-		document.body.style.backgroundColor = '';
-	}, 500)
 	
-	
-	console.log("DONE")
+	signalEnd();
 }
 
 var orientations = [180, 0, 315, 225, 90, 270, 135, 45]
@@ -251,10 +259,10 @@ window.addEventListener('mousewheel', function(e){
 			var closest = orientations.sort(function(a, b){
 				return Math.pow(mean - a, 2) - Math.pow(mean - b, 2)
 			})[0];
-			console.log(mean, stdev, closest);
+			// console.log(mean, stdev, closest);
 			// console.log(wheelBuffer.length)
 			if(checkpointScroll == lastDetectedScroll && wheelBuffer.length > 1 && stdev < 15 && Math.abs(closest - mean) < 20){
-				console.log('creatin arrow')
+				// console.log('creatin arrow')
 				navArrow = createArrow();
 				direction = closest;
 				drawArrow(navArrow, closest);
@@ -264,11 +272,6 @@ window.addEventListener('mousewheel', function(e){
 					if(currentSession != 0) return;
 					if(checkpointScroll == lastDetectedScroll){
 						currentSession = 2;
-						// beginTrigger();
-						// Okay, continue.
-						// console.log("CONTINUE")
-						// isTriggering = 2;
-						// beginTrigger();
 						for(var i = 0; i < wheelBuffer.length; i++){
 							mouseWheel(wheelBuffer[i][0], wheelBuffer[i][1]);
 						}
@@ -277,9 +280,6 @@ window.addEventListener('mousewheel', function(e){
 						if(navArrow) navArrow.style.display = 'none';
 						endTrigger();
 						currentSession = 1;
-						// isTriggering = 0;
-						// wheelBuffer = []; //clear buffer
-						// console.log("ABORT")
 						//ABORT ABORT ABORT, the wheeling triggered a scroll
 					}
 				}, 10); // empirically, the margin is usually only about 3msecs
