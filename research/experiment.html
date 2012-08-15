@@ -169,10 +169,16 @@ function removeListeners(){
 
 function mouseWheel(x, y){
 	//dot product of direction and the stuff, why, i dont know im dumb
-	var dp = XY_SPLIT * Math.cos(direction / 180 * Math.PI) * x + (1-XY_SPLIT) * Math.sin(direction / 180 * Math.PI) * y;
-	
+	var ty = XY_SPLIT * y, tx = (1 - XY_SPLIT) * x;
+	var r_dir = direction / 180 * Math.PI;
+	var r_cmp = Math.atan2(ty, tx);
+	var mag = Math.sqrt(ty*ty + tx*tx);
+	var dp = mag * Math.cos(r_cmp - r_dir);
+	var ortho = mag * Math.cos(r_cmp - r_dir + Math.PI / 2)
+
+	// console.log(Math.round(xortho), Math.round(ortho))
 	//give transformLength a positive thing just cause
-	len += transformLength(Math.abs(dp)) * (dp < 0 ? -1 : 1);
+	len += transformLength(Math.abs(dp)) * (dp < 0 ? -1 : 1) - Math.abs(ortho / 3); //subtract ortho to punish deviation
 
 	// x = x / 500 * innerWidth
 	// y = y / 500 * innerHeight
@@ -241,7 +247,7 @@ function scrollTrigger(){
 window.addEventListener('mousewheel', function(e){
 	clearTimeout(lastWheelTimer);
 
-	
+
 	if(currentSession == 1 || currentSession == 3){
 		lastWheelTimer = setTimeout(endTrigger, 400);	
 	}else{
@@ -255,8 +261,10 @@ window.addEventListener('mousewheel', function(e){
 		wheelBuffer.push([-e.wheelDeltaX, -e.wheelDeltaY]);
 	}
 	if(currentSession == 2 || currentSession == 3){
-		e.preventDefault();
-		e.stopPropagation();
+		if(len > LENGTH_THRESHOLD * 0.01){
+			e.preventDefault();
+			e.stopPropagation();	
+		}
 	}
 	if(currentSession == 2){
 		mouseWheel(-e.wheelDeltaX, -e.wheelDeltaY);
@@ -289,33 +297,21 @@ window.addEventListener('mousewheel', function(e){
 			// console.log(mean, stdev, closest);
 			// console.log(wheelBuffer.length)
 			if(checkpointScroll == lastDetectedScroll && wheelBuffer.length > 0 && stdev < 15 && Math.abs(closest - mean) < 20){
-				// console.log('creatin arrow')
-				navArrow = createArrow();
 				direction = closest;
+				navArrow = createArrow();
 				drawArrow(navArrow, closest);
 				renderProgress(0)
+				currentSession = 2;
+				wheelBuffer = [];
 			
-				setTimeout(function(){
-					if(currentSession != 0) return;
-					if(checkpointScroll == lastDetectedScroll){
-						currentSession = 2;
-						// for(var i = 0; i < wheelBuffer.length; i++){
-						// 	mouseWheel(wheelBuffer[i][0], wheelBuffer[i][1]);
-						// }
-						wheelBuffer = [];
-					}else{
-
-						scrollTrigger()
-						//ABORT ABORT ABORT, the wheeling triggered a scroll
-					}
-				}, 10); // empirically, the margin is usually only about 3msecs
-				// so having an order of magnitude's worth in leeway is probably
-				// sufficient	
 			}else{
 				scrollTrigger()
 			}
 			
-		}, 150)
+		}, 100)
+		// empirically, the margin is usually only about 3msecs
+		// so having an order of magnitude's worth in leeway is probably
+		// sufficient	
 		
 	}
 })
