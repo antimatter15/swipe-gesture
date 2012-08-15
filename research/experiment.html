@@ -46,6 +46,7 @@ function createArrow(){
 	container.style.overflow = 'hidden';
 	container.style.width = innerWidth + 'px';
 	container.style.height = innerHeight + 'px';
+	container.style.zIndex = '9999999999999999';
 
 	var canvas = document.createElement('canvas');
 	canvas.style.opacity = 0;
@@ -53,9 +54,10 @@ function createArrow(){
 	canvas.style.borderRadius = '10px';
 	canvas.style.padding = '10px';
 
-	canvas.style.webkitTransitionProperty = 'opacity, -webkit-transform, transform, top, left';
-	canvas.style.webkitTransitionDuration = '0.5s, 0.5s, 0.5s, 0.5s'
+	canvas.style.webkitTransitionProperty = 'opacity, -webkit-transform, transform, top, left, right, bottom';
+	canvas.style.webkitTransitionDuration = '0.5s, 0.5s, 0.2s, 0.2s, 0.2s, 0.2s'
 	canvas.style.position = 'absolute';
+	canvas.style.zIndex = '9999999999999999';
 	
 
 	container.appendChild(canvas);
@@ -66,7 +68,7 @@ function createArrow(){
 
 var scrollListened = [];
 var lastDetectedScroll = 0;
-var isTriggering = 0;
+// var isTriggering = 0;
 var wheelBuffer = [];
 var lastWheelTimer = -1;
 var direction;
@@ -125,34 +127,38 @@ function renderProgress(pct){
 	if(navArrow){
 		// console.log(pct)
 		// console.log(navArrow.style.left)
-		navArrow.style.opacity = pct * 0.5;
+		navArrow.style.opacity = pct * 0.4 + 0.1;
 		if(direction == 180 || direction == 0){
 			navArrow.style.top = (innerHeight / 2 - 25) + 'px';
 		}else if(direction == 270 || direction == 90){
 			navArrow.style.left = (innerWidth / 2 - 25) + 'px';
 		}
-		// pct = 1 - pct 
-		if(direction == 180){
-			navArrow.style.left = (innerWidth * ( 1 - pct) - 50) + 'px';
-		}else if(direction == 0){
+		if(direction == 180){ //LEFT
+			// navArrow.style.left = (innerWidth * ( 1 - pct) - 70) + 'px';
+			navArrow.style.right = innerWidth * pct + 'px';
+		}else if(direction == 0){ //RIGHT
 			navArrow.style.left = innerWidth * pct + 'px';
-		}else if(direction == 270){
-			navArrow.style.top = (innerHeight * (1-pct) - 50) + 'px';
-		}else if(direction == 90){
+		}else if(direction == 270){ //UP
+			// navArrow.style.top = (innerHeight * (1-pct) - 70) + 'px';
+			navArrow.style.bottom = innerHeight * pct + 'px';
+		}else if(direction == 90){ //DOWN
 			navArrow.style.top = innerHeight * pct + 'px';
+		}
+
+		//these are for the diags
+		if(direction == 315 || direction == 225){
+			navArrow.style.bottom = innerHeight * pct + 'px';
+		}else if(direction == 135 || direction == 45){
+			navArrow.style.top = innerHeight * pct + 'px';
+		}
+		if(direction == 315 || direction == 45){
+			navArrow.style.left = innerWidth * pct + 'px';
+		}else if(direction == 225 || direction == 135){
+			navArrow.style.right = innerWidth * pct + 'px';
 		}
 
 	}
 }
-
-// function endTrigger(){
-// 	console.log("ITS OVER")
-// 	isTriggering = 0;
-// 	wheelBuffer = [];
-// 	navArrow.style.opacity = 0;
-// 	navArrow.style.webkitTransform = 'scale(2.0)'
-// 	// document.body.removeChild(navArrow);
-// }
 
 
 var currentSession = -1;
@@ -183,6 +189,10 @@ function removeArrow(arrow, complete){
 }
 
 function endTrigger(){
+	if(navArrow){
+		navArrow.style.webkitTransitionDuration = '0.5s, 0.5s, 0.5s, 0.5s, 0.5s, 0.5s'	
+	}
+	
 	removeArrow(navArrow);
 	currentSession = -1;
 	wheelBuffer = [];
@@ -197,8 +207,8 @@ function endTrigger(){
 	console.log("DONE")
 }
 
-// var orientations = [180, 0, 45, 135, 90, 270]
-var orientations = [180, 0, 90, 270]
+var orientations = [180, 0, 315, 225, 90, 270, 135, 45]
+// var orientations = [180, 0, 90, 270]
 
 window.addEventListener('mousewheel', function(e){
 	clearTimeout(lastWheelTimer);
@@ -243,7 +253,7 @@ window.addEventListener('mousewheel', function(e){
 			})[0];
 			console.log(mean, stdev, closest);
 			// console.log(wheelBuffer.length)
-			if(checkpointScroll == lastDetectedScroll && wheelBuffer.length > 1 && stdev < 10 && Math.abs(closest - mean) < 10){
+			if(checkpointScroll == lastDetectedScroll && wheelBuffer.length > 1 && stdev < 15 && Math.abs(closest - mean) < 20){
 				console.log('creatin arrow')
 				navArrow = createArrow();
 				direction = closest;
@@ -251,6 +261,7 @@ window.addEventListener('mousewheel', function(e){
 				renderProgress(0)
 			
 				setTimeout(function(){
+					if(currentSession != 0) return;
 					if(checkpointScroll == lastDetectedScroll){
 						currentSession = 2;
 						// beginTrigger();

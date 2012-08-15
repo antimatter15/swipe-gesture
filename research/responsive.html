@@ -1,0 +1,26 @@
+<canvas id="c" style="top:0;left:0;position:absolute"></canvas>
+<script>
+var canvas = document.getElementById('c');
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+var c = canvas.getContext('2d');
+var posX = innerWidth / 2, posY = innerHeight / 2;
+
+function sign(num){
+	return num
+	// return num ? (Math.abs(num) / num) : num
+}
+
+window.addEventListener('mousewheel', function(e){
+	c.beginPath()
+	c.moveTo(posX, posY);
+	posX -= sign(e.wheelDeltaX / 20);
+	posY -= sign(e.wheelDeltaY / 20);
+	c.lineTo(posX, posY);
+	c.fillRect(posX - 1, posY - 1, 2, 2)
+	c.stroke()
+})
+
+
+
+</script>

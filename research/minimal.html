@@ -1,0 +1,57 @@
+<h1 id="status">Start Scrolling</h1>
+
+<div style="width: 300px; height: 300px; overflow: scroll">
+	<div style="background:#dddddd; width: 600px; height: 600px;">
+	</div>
+</div>
+
+<script>
+var scrollListened = [];
+var lastDetectedScroll = 0;
+var lastWheelTimer = -1;
+var wheelType = -1;
+
+function detectScroll(e){
+	lastDetectedScroll = +new Date;
+	removeListeners();
+}
+
+function removeListeners(){
+	for(var i = 0; i < scrollListened.length; i++){
+		scrollListened[i].removeEventListener('scroll', detectScroll, false)
+	}
+	scrollListened = [];
+}
+
+function endTrigger(){
+	wheelType = -1;
+	clearTimeout(lastWheelTimer);
+	console.log("reset")
+}
+
+window.addEventListener('mousewheel', function(e){
+	clearTimeout(lastWheelTimer);
+	lastWheelTimer = setTimeout(endTrigger, 500);
+	if(wheelType == -1){
+		var el = document.elementFromPoint(e.clientX, e.clientY);
+		do {
+			scrollListened.push(el);
+			el.addEventListener('scroll', detectScroll, false);	
+		} while (el = el.parentNode);
+		var checkpointScroll = lastDetectedScroll;
+		wheelType = 0;
+		setTimeout(function(){
+			if(wheelType != 0) return;
+			if(checkpointScroll == lastDetectedScroll){
+				console.log("SWIPE")
+				document.getElementById('status').innerHTML = 'SWIPE'
+				wheelType = 2;
+			}else{
+				document.getElementById('status').innerHTML = 'SCROLL'
+				console.log("SCROLL")
+				wheelType = 1;
+			}
+		}, 150)	
+	}
+})
+</script>
