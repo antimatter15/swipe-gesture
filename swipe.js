@@ -25,11 +25,9 @@ function transformLength(x){ //x is a positive real number
 
 
 var orientations = [180, 0, 315, 225, 90, 270, 135, 45];
-var LENGTH_THRESHOLD = 1000;
+var LENGTH_THRESHOLD = 500;
 var XY_SPLIT = 0.5; //50-50
 var INVERT_ARROW = false;
-
-
 
 function drawArrow(canvas, orientation){
 	//parameters of drawing an arrow
@@ -38,7 +36,6 @@ function drawArrow(canvas, orientation){
 		head_rad = 15, 
 		shaft_len = 30;
 
-	// orientation = -orientation;
 	orientation = (2 * 360 + (orientation || 0)) % 360;
 
 	canvas.width = 50;
@@ -48,13 +45,8 @@ function drawArrow(canvas, orientation){
 
 	c.beginPath()
 	c.fillStyle = 'white';
-
-
-
 	c.translate(25, 25)
-	// c.scale(-1, 1)
 	c.rotate(Math.PI/180 * orientation);
-	// c.scale(-1, 1)
 
 	var x = -(shaft_len + point_len) / 2, y = 0;
 
@@ -86,7 +78,7 @@ function createArrow(){
 	canvas.style.padding = '10px';
 
 	canvas.style.webkitTransitionProperty = 'opacity, -webkit-transform, transform, top, left, right, bottom';
-	canvas.style.webkitTransitionDuration = '0.5s, 0.5s, 0.2s, 0.2s, 0.2s, 0.2s'
+	canvas.style.webkitTransitionDuration = '0.5s, 0.5s, 0s, 0s, 0s, 0s'
 	canvas.style.position = 'absolute';
 	canvas.style.zIndex = '9999999999999999';
 	
@@ -104,15 +96,17 @@ function renderProgress(pct){
 		navArrow.style.opacity = pct * 0.4 + 0.1;	
 	}
 
-	if(INVERT_ARROW){
-		pct = 1 - pct;	
-	}
+	if(INVERT_ARROW) pct = 1 - pct;	
 	
+	var boxEdge = 50 + 10 * 2; //50px w/h + 10px padding
+	
+	//CAVEAT EMPTOR, the 45deg multiples render slightly off
+	//but fixing that might incur moar code, ergo not doing it
+	//not now at least, but if you feel like doing it, have fun
 
-	var boxEdge = 70;
 	var nW = ((innerWidth + boxEdge) * pct - boxEdge) + 'px';
 	var nH = ((innerHeight + boxEdge) * pct - boxEdge) + 'px';
-
+	// console.log(nW, nH)
 	if(direction == 180 || direction == 0){
 		navArrow.style.top = (innerHeight / 2 - boxEdge / 2) + 'px';
 	}else if(direction == 270 || direction == 90){
@@ -145,7 +139,7 @@ var currentSession = -1;
 // 2 = MAGICALPONIES
 
 function detectScroll(e){
-	// console.log("detected scroll on", e.target, e, +new Date)
+	console.log("detected scroll on", e.target, e, +new Date)
 	lastDetectedScroll = +new Date;
 	removeListeners();
 }
@@ -158,14 +152,22 @@ function removeListeners(){
 }
 
 function mouseWheel(x, y){
-	//dot product of direction and the stuff, why, i dont know im dumb
-	var dp = XY_SPLIT * Math.cos(direction / 180 * Math.PI) * x + (1-XY_SPLIT) * Math.sin(direction / 180 * Math.PI) * y;
-	
-	//give transformLength a positive thing just cause
-	len += transformLength(Math.abs(dp)) * (dp < 0 ? -1 : 1);
+	// if(navArrow && x % 10 == 0 && y % 10 == 0 && (Math.abs(x) > 100 || Math.abs(y) > 100)){
+	// 	navArrow.style.webkitTransitionDuration = '0.5s, 0.5s, 0.5s, 0.2s, 0.2s, 0.2s';
+	// }
 
-	// x = x / 500 * innerWidth
-	// y = y / 500 * innerHeight
+	//dot product of direction and the stuff, why, i dont know im dumb
+	var ty = XY_SPLIT * y, tx = (1 - XY_SPLIT) * x;
+	var r_dir = direction / 180 * Math.PI;
+	var r_cmp = Math.atan2(ty, tx);
+	var mag = Math.sqrt(ty*ty + tx*tx);
+	var dp = mag * Math.cos(r_cmp - r_dir);
+	var ortho = mag * Math.sin(r_cmp - r_dir)
+
+	// console.log(Math.round(xortho), Math.round(ortho))
+	//give transformLength a positive thing just cause
+	len += transformLength(Math.abs(dp)) * (dp < 0 ? -1 : 1) - Math.abs(ortho / 3); //subtract ortho to punish deviation
+
 	var pct = Math.max(0, Math.min(1, len / LENGTH_THRESHOLD));
 	// console.log(dp, len, pct);
 	renderProgress(pct);
@@ -184,20 +186,19 @@ function mouseWheel(x, y){
 function removeArrow(arrow, complete){
 	if(arrow && arrow.style){
 		if(complete){
+			arrow.style.webkitTransitionDuration = '0.5s, 0.5s, 0.2s, 0.2s, 0.2s, 0.2s'	
 			renderProgress(1)	
 		}else if(currentSession != 3){
+			arrow.style.webkitTransitionDuration = '0.5s, 0.5s, 0.5s, 0.5s, 0.5s, 0.5s';
 			renderProgress(0)
 			arrow.style.webkitTransform = 'scale(2.0)';
 			signalCancellation()
 		}
 		
 		arrow.addEventListener('webkitTransitionEnd', function(){
-			// console.log('removing tranny')
 			var container = arrow.parentNode;
-
 			if(container.parentNode)
 				container.parentNode.removeChild(container);
-
 		})
 	}
 	if(arrow === navArrow){
@@ -206,22 +207,16 @@ function removeArrow(arrow, complete){
 }
 
 function endTrigger(){
-	if(navArrow){
-		navArrow.style.webkitTransitionDuration = '0.5s, 0.5s, 0.5s, 0.5s, 0.5s, 0.5s'	
-	}
 	signalEnd();
 	removeArrow(navArrow);
 	currentSession = -1;
 	wheelBuffer = [];
 	len = 0;
-	
 	clearTimeout(lastWheelTimer);
-	
 }
 
 function scrollTrigger(){
 	if(navArrow) navArrow.style.display = 'none';
-	// endTrigger();
 	removeArrow(navArrow);
 	wheelBuffer = [];
 	currentSession = 1;
@@ -229,26 +224,35 @@ function scrollTrigger(){
 }
 
 
-window.addEventListener('mousewheel', function(e){
+function wheelEvent(e){
 	clearTimeout(lastWheelTimer);
-	if(currentSession == 1 || currentSession == 3){
-		lastWheelTimer = setTimeout(endTrigger, 500);	
+
+	//to convert wheelDeltas to cartesian, you have to flip it
+	//because negative = scroll down
+
+	var deltaX = -e.wheelDeltaX, deltaY = -e.wheelDeltaY;
+
+	if(currentSession == 1){
+		lastWheelTimer = setTimeout(endTrigger, 600);
+	}else if(currentSession == 3){
+		lastWheelTimer = setTimeout(endTrigger, 400);	
 	}else{
-		lastWheelTimer = setTimeout(endTrigger, 1000);	
+		lastWheelTimer = setTimeout(endTrigger, 900);	
 	}
 	
-
 	if(currentSession == 0 || currentSession == -1){
-		//to convert wheelDeltas to cartesian, you have to flip it
-		//because negative = scroll down
-		wheelBuffer.push([-e.wheelDeltaX, -e.wheelDeltaY]);
+		wheelBuffer.push([deltaX, deltaY]);
 	}
 	if(currentSession == 2 || currentSession == 3){
-		e.preventDefault();
-		e.stopPropagation();
+		if(len > LENGTH_THRESHOLD * 0.01){
+			e.preventDefault();
+			e.stopPropagation();	
+		}else if(len < -0.1 * LENGTH_THRESHOLD){
+			scrollTrigger();
+		}
 	}
 	if(currentSession == 2){
-		mouseWheel(-e.wheelDeltaX, -e.wheelDeltaY);
+		mouseWheel(deltaX, deltaY);
 
 	}else if(currentSession == -1){
 		removeListeners();
@@ -264,47 +268,40 @@ window.addEventListener('mousewheel', function(e){
 		setTimeout(function(){
 			var orientation = 0;
 			// console.log(wheelBuffer)
-			var angles = wheelBuffer.map(function(xy){
-				var x = xy[0], y = xy[1];
-				return (2 * 360 + Math.atan2(y, x) / Math.PI * 180) % 360;
+			var mag_sum = 0, ang_sum = 0;
+			var angles = wheelBuffer.forEach(function(xy){
+				var x = xy[0], y = xy[1], mag = Math.sqrt(x * x + y * y);
+				mag_sum += mag;
+				ang_sum += ((2 * 360 + Math.atan2(y, x) / Math.PI * 180) % 360) * mag;
 			});
-			var mean = angles.reduce(function(a, b){return a + b}) / angles.length;
-			var sqerr = angles.map(function(e){ return (e - mean) * (e - mean) });
-			var stdev = Math.sqrt(sqerr.reduce(function(a, b){return a + b})) / angles.length;
+			var mean = ang_sum / Math.max(1, mag_sum);
 			
 			var closest = orientations.sort(function(a, b){
 				return Math.pow(mean - a, 2) - Math.pow(mean - b, 2)
 			})[0];
 			// console.log(mean, stdev, closest);
 			// console.log(wheelBuffer.length)
-			if(checkpointScroll == lastDetectedScroll && wheelBuffer.length > 0 && stdev < 15 && Math.abs(closest - mean) < 20){
-				// console.log('creatin arrow')
-				navArrow = createArrow();
+			if(checkpointScroll == lastDetectedScroll && 
+				wheelBuffer.length > 0 && 
+				// stdev < 15 && 
+				Math.abs(closest - mean) < 30
+			){
 				direction = closest;
+				navArrow = createArrow();
 				drawArrow(navArrow, closest);
 				renderProgress(0)
+				currentSession = 2;
+				wheelBuffer = [];
 			
-				setTimeout(function(){
-					if(currentSession != 0) return;
-					if(checkpointScroll == lastDetectedScroll){
-						currentSession = 2;
-						for(var i = 0; i < wheelBuffer.length; i++){
-							mouseWheel(wheelBuffer[i][0], wheelBuffer[i][1]);
-						}
-						wheelBuffer = [];
-					}else{
-
-						scrollTrigger()
-						//ABORT ABORT ABORT, the wheeling triggered a scroll
-					}
-				}, 10); // empirically, the margin is usually only about 3msecs
-				// so having an order of magnitude's worth in leeway is probably
-				// sufficient	
 			}else{
 				scrollTrigger()
 			}
 			
-		}, 150)
-		
+		}, 100)
+		// empirically, the margin is usually only about 3msecs
+		// so having an order of magnitude's worth in leeway is probably
+		// sufficient
 	}
-})
+}
+
+window.addEventListener('mousewheel', wheelEvent);

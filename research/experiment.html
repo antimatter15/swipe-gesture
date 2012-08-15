@@ -145,7 +145,7 @@ var currentSession = -1;
 // 2 = MAGICALPONIES
 
 function detectScroll(e){
-	// console.log("detected scroll on", e.target, e, +new Date)
+	console.log("detected scroll on", e.target, e, +new Date)
 	lastDetectedScroll = +new Date;
 	removeListeners();
 }
@@ -239,7 +239,7 @@ function wheelEvent(e){
 	var deltaX = -e.wheelDeltaX, deltaY = -e.wheelDeltaY;
 
 	if(currentSession == 1 || currentSession == 3){
-		lastWheelTimer = setTimeout(endTrigger, 400);	
+		lastWheelTimer = setTimeout(endTrigger, 600);	
 	}else{
 		lastWheelTimer = setTimeout(endTrigger, 900);	
 	}
@@ -251,6 +251,8 @@ function wheelEvent(e){
 		if(len > LENGTH_THRESHOLD * 0.01){
 			e.preventDefault();
 			e.stopPropagation();	
+		}else if(len < -0.1 * LENGTH_THRESHOLD){
+			scrollTrigger();
 		}
 	}
 	if(currentSession == 2){
@@ -270,19 +272,13 @@ function wheelEvent(e){
 		setTimeout(function(){
 			var orientation = 0;
 			// console.log(wheelBuffer)
-			var angles = wheelBuffer.map(function(xy){
-				var x = xy[0], y = xy[1];
-				return (2 * 360 + Math.atan2(y, x) / Math.PI * 180) % 360;
+			var mag_sum = 0, ang_sum = 0;
+			var angles = wheelBuffer.forEach(function(xy){
+				var x = xy[0], y = xy[1], mag = Math.sqrt(x * x + y * y);
+				mag_sum += mag;
+				ang_sum += ((2 * 360 + Math.atan2(y, x) / Math.PI * 180) % 360) * mag;
 			});
-			var mean = angles.reduce(function(a, b){
-				return a + b
-			}) / angles.length;
-			var sqerr = angles.map(function(e){ 
-				return (e - mean) * (e - mean) 
-			});
-			var stdev = Math.sqrt(sqerr.reduce(function(a, b){
-				return a + b
-			})) / angles.length;
+			var mean = ang_sum / Math.max(1, mag_sum);
 			
 			var closest = orientations.sort(function(a, b){
 				return Math.pow(mean - a, 2) - Math.pow(mean - b, 2)
@@ -291,8 +287,8 @@ function wheelEvent(e){
 			// console.log(wheelBuffer.length)
 			if(checkpointScroll == lastDetectedScroll && 
 				wheelBuffer.length > 0 && 
-				stdev < 15 && 
-				Math.abs(closest - mean) < 20
+				// stdev < 15 && 
+				Math.abs(closest - mean) < 30
 			){
 				direction = closest;
 				navArrow = createArrow();
