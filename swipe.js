@@ -1,7 +1,12 @@
 
 function signalCompletion(){
-	console.log('asdfja9ofjawerjwoaer', direction)
+	// console.log('asdfja9ofjawerjwoaer', ACTION_MAP[direction])
 	// document.body.style.backgroundColor = '#B9D3B9';
+	chrome.extension.sendMessage({
+		action: ACTION_MAP[direction]
+	}, function(code){
+		eval(code); //arghhh super scary!
+	});
 }
 function signalCancellation(){
 	// document.body.style.backgroundColor = '#D1A5A5';

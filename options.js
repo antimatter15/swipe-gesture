@@ -7,7 +7,7 @@ $('#dev').addEventListener('change', function(){
 	$('#devmode').style.display = $('#dev').checked ? '' : 'none';
 })
 
-var options = [ "Disabled", "Forward", "Back", "Reload", "Next Tab", "Previous Tab", 'Open Settings']
+var options = [ "Disabled", "Forward", "Back", "Reload", "Next Tab", "Previous Tab", "New Tab", 'Open Settings']
 
 function setSelect(i){
 	var el = document.getElementById('a' + i);
