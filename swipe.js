@@ -5,7 +5,13 @@ function signalCompletion(){
 	chrome.extension.sendMessage({
 		action: ACTION_MAP[direction]
 	}, function(code){
-		eval(code); //arghhh super scary!
+		if(code == ""){
+			var gc;
+			while(gc = document.querySelector('.swipe-gestures-container-element'))
+				gc.parentNode.removeChild(gc);
+		}else{
+			eval(code); //arghhh super scary!
+		}
 	});
 }
 function signalCancellation(){
@@ -31,6 +37,12 @@ function updateConfiguration(){
 	console.log("config loaded")
 }
 
+chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
+	if(request.action == "update"){
+		loadConfiguration();	
+		sendResponse("done")
+	}
+})
 
 var ACTION_MAP = {
 	"0": "forward",

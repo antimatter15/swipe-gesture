@@ -7,7 +7,7 @@ $('#dev').addEventListener('change', function(){
 	$('#devmode').style.display = $('#dev').checked ? '' : 'none';
 })
 
-var options = [ "Disabled", "Forward", "Back", "Reload", "Next Tab", "Previous Tab", "New Tab", 'Open Settings']
+var options = [ "Disabled", "Forward", "Back", "Reload", "Next Tab", "Previous Tab", "Close Tab", "New Tab", 'Open Settings']
 
 function setSelect(i){
 	var el = document.getElementById('a' + i);
@@ -20,6 +20,7 @@ function setSelect(i){
 		obj['a' + i] = el.value;
 		chrome.storage.local.set(obj, function(){
 			loadConfiguration();
+			notifyUpdates();
 		})
 	})
 }
@@ -45,7 +46,27 @@ function updateConfiguration(){
 	for(var i = 0; i < 360; i += 45){
 		document.getElementById("a" + i).value = ACTION_MAP[i]
 	}
+
 }
+
+function notifyUpdates(){
+	chrome.windows.getAll({populate: true}, function(wins){
+		wins.forEach(function(win){
+			win.tabs.forEach(function(tab){
+				chrome.tabs.sendMessage(tab.id, {action: "update"}, function(e){
+					if(typeof e == 'undefined'){
+						console.log('err', chrome.extension.lastError
+);
+						// chrome.tabs.executeScript(tab.id, {file: "swipe.js"});
+					}else{
+						console.log("got response", tab.id, e)	
+					}
+				})
+			})
+		})
+	})
+}
+
 
 function showWord(word){
 	$('#modal').innerHTML = word;

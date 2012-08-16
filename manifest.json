@@ -1,6 +1,6 @@
 {
 	"name": "Swipe Gesture",
-	"version": "1.9",
+	"version": "1.99",
 	"manifest_version": 2,
 	"description": "Add OSX-style multitouch gestures to Chromebooks",
 	"icons": {
