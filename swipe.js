@@ -22,12 +22,40 @@ function transformLength(x){ //x is a positive real number
 	// return 1
 	return x
 }
+function updateConfiguration(){
+	console.log("config loaded")
+}
 
 
-var orientations = [180, 0, 315, 225, 90, 270, 135, 45];
+var ACTION_MAP = {
+	"0": "next",
+	"45": "disabled",
+	"90": "disabled",
+	"135": "disabled",
+	"180": "back",
+	"225": "previous-tab",
+	"270": "open-settings",
+	"315": "next-tab"
+}
+
+
+// var orientations = [180, 0, 315, 225, 90, 270, 135, 45];
 var LENGTH_THRESHOLD = 500;
-var XY_SPLIT = 0.5; //50-50
 var INVERT_ARROW = false;
+
+
+function loadConfiguration(){
+	chrome.storage.local.get(function(e){
+		console.log(e)
+		INVERT_ARROW = e.INVERT_ARROW;
+		LENGTH_THRESHOLD = e.LENGTH_THRESHOLD;
+		updateConfiguration();
+	})
+}
+
+loadConfiguration()
+
+var XY_SPLIT = 0.42; //50-50 is 50, .42 favors vertical axis as most trackpads have something like a 4-3 ratio
 
 function drawArrow(canvas, orientation){
 	//parameters of drawing an arrow
@@ -159,7 +187,7 @@ function mouseWheel(x, y){
 	// }
 
 	//dot product of direction and the stuff, why, i dont know im dumb
-	var ty = XY_SPLIT * y, tx = (1 - XY_SPLIT) * x;
+	var ty = (XY_SPLIT) * y, tx = (1 - XY_SPLIT) * x;
 	var r_dir = direction / 180 * Math.PI;
 	var r_cmp = Math.atan2(ty, tx);
 	var mag = Math.sqrt(ty*ty + tx*tx);
@@ -230,6 +258,14 @@ function scrollTrigger(){
 
 
 function wheelEvent(e){
+	var orientations = Object.keys(ACTION_MAP).filter(function(e){
+		return ACTION_MAP[e] != 'disabled'
+	}).map(function(e){
+		return parseInt(e, 10)
+	});
+
+	if(orientations.length == 0) return;
+
 	clearTimeout(lastWheelTimer);
 
 	//to convert wheelDeltas to cartesian, you have to flip it
