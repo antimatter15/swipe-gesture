@@ -11,18 +11,16 @@ var options = [ "Disabled", "Forward", "Back", "Reload", "Next Tab", "Previous T
 
 function setSelect(i){
 	var el = document.getElementById('a' + i);
-	// var values = [];
-	// for(var j = 0; j < el.options.length; j++){
-	// 	values.push(el.options[j].value)
-	// }
 	for(var j = 0; j < options.length; j++){
 		var slug = options[j].replace(/ /g, '-').toLowerCase();
-		// if(values.indexOf(slug) == -1){
-			el.options.add(new Option(options[j], slug))
-		// }
+		el.options.add(new Option(options[j], slug))	
 	}	
 	el.addEventListener('change', function(){
-		//i = angle
+		var obj = {};
+		obj['a' + i] = el.value;
+		chrome.storage.local.set(obj, function(){
+			loadConfiguration();
+		})
 	})
 }
 
@@ -44,4 +42,33 @@ $('#thresh').addEventListener('change', function(){
 function updateConfiguration(){
 	$('#reverse').checked = INVERT_ARROW;
 	$('#thresh').value = LENGTH_THRESHOLD;
+	for(var i = 0; i < 360; i += 45){
+		document.getElementById("a" + i).value = ACTION_MAP[i]
+	}
+}
+
+function showWord(word){
+	$('#modal').innerHTML = word;
+	$('#modal').style.display = '';
+	setTimeout(function(){
+		$('#modal').style.opacity = '0.5';
+	}, 10)
+}
+
+$('#modal').addEventListener('webkitTransitionEnd', function(){
+	if(+$('#modal').style.opacity == 0){
+		$('#modal').style.display = 'none';	
+	}else{
+		$('#modal').style.opacity = '0';	
+	}
+})
+
+function signalCompletion(){
+	var slugmap = {};
+	for(var j = 0; j < options.length; j++){
+		var slug = options[j].replace(/ /g, '-').toLowerCase();
+		slugmap[slug] = options[j]
+	}
+	showWord(slugmap[ACTION_MAP[direction]])
+	
 }

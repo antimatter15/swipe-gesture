@@ -52,6 +52,24 @@ fieldset select {
 	padding-right:25px;
 
 }
+#modal {
+	background: black;
+	border-radius: 10px;
+	font-size: x-large;
+	color: white;
+	padding: 20px;
+	margin-left: auto;
+	margin-right: auto;
+	position: absolute;
+	left: 40%;
+	right: 40%;
+	top: 40%;
+	bottom: 40%;
+	min-height: 50px;
+	min-width: 100px;
+	text-align: center;
+	-webkit-transition: 1s opacity;
+}
 </style>
 <title>Swipe Gesture</title>
 </head>
@@ -132,6 +150,7 @@ fieldset select {
 	</p>
 </div>
 
+<div id="modal" style="opacity:0;display:none"></div>
 <script src="swipe.js"></script>
 <script src="options.js"></script>
 </body>

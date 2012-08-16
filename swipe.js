@@ -28,7 +28,7 @@ function updateConfiguration(){
 
 
 var ACTION_MAP = {
-	"0": "next",
+	"0": "forward",
 	"45": "disabled",
 	"90": "disabled",
 	"135": "disabled",
@@ -49,6 +49,11 @@ function loadConfiguration(){
 		console.log(e)
 		INVERT_ARROW = e.INVERT_ARROW;
 		LENGTH_THRESHOLD = e.LENGTH_THRESHOLD;
+		Object.keys(ACTION_MAP).forEach(function(angle){
+			if(e["a"+angle]){
+				ACTION_MAP[angle] = e["a"+angle];
+			}
+		})
 		updateConfiguration();
 	})
 }
